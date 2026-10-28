@@ -1,240 +1,118 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Profile &amp; Todo List</title>
-<style>
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FOODPICKER ITF — สุ่มเมนูอาหาร</title>
+  <meta name="description" content="เว็บไซต์สุ่มเมนูอาหาร ช่วยตัดสินใจว่าวันนี้จะกินอะไรดี" />
 
-    body {
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 24px;
-        background: #1c2733;
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-    }
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700&family=Prompt:wght@300;400;500;600&display=swap"
+    rel="stylesheet"
+  />
 
-    /* ---------- การ์ดเดียว ---------- */
-    .card {
-        width: 100%;
-        max-width: 760px;
-        display: flex;
-        gap: 32px;
-        padding: 36px;
-        background: #24313f;
-        border: 1px solid #31404f;
-        border-radius: 16px;
-        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
-    }
-
-    /* ---------- ซ้าย: โปรไฟล์ ---------- */
-    .profile {
-        flex: 1 1 45%;
-        text-align: center;
-        border-right: 1px solid #31404f;
-        padding-right: 32px;
-    }
-
-    .profile img {
-        width: 120px;
-        height: 120px;
-        border-radius: 50%;
-        object-fit: cover;
-        border: 3px solid #ff8a3d;
-        display: block;
-        margin: 0 auto 16px;
-    }
-
-    h1 {
-        font-size: 1.5rem;
-        color: #ff8a3d;
-        margin-bottom: 4px;
-    }
-
-    p {
-        color: #d7dee6;
-        font-size: 0.95rem;
-        line-height: 1.6;
-    }
-
-    .info {
-        margin-bottom: 10px;
-    }
-
-    .skills {
-        margin-top: 14px;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        justify-content: center;
-    }
-
-    .skills span {
-        background: #1c2733;
-        border: 1px solid #3a4a5b;
-        color: #e3e9ef;
-        font-size: 0.8rem;
-        padding: 4px 12px;
-        border-radius: 999px;
-    }
-
-    a {
-        display: inline-block;
-        margin-top: 16px;
-        color: #ff8a3d;
-        font-size: 0.9rem;
-        text-decoration: none;
-        border-bottom: 1px solid #ff8a3d;
-        word-break: break-all;
-    }
-
-    a:hover {
-        color: #ffa96b;
-    }
-
-    /* ---------- ขวา: Todo List ---------- */
-    .todo {
-        flex: 1 1 55%;
-    }
-
-    h2 {
-        font-size: 1.3rem;
-        color: #ff8a3d;
-        margin-bottom: 16px;
-    }
-
-    .todo-input {
-        display: flex;
-        gap: 10px;
-        margin-bottom: 18px;
-    }
-
-    .todo-input input {
-        flex: 1;
-        padding: 10px 14px;
-        border: 1px solid #3a4a5b;
-        border-radius: 8px;
-        background: #1c2733;
-        color: #eef2f6;
-        font-size: 0.95rem;
-        outline: none;
-    }
-
-    .todo-input input:focus {
-        border-color: #ff8a3d;
-    }
-
-    .todo-input button {
-        padding: 10px 20px;
-        border: none;
-        border-radius: 8px;
-        background: #ff8a3d;
-        color: #1c2733;
-        font-size: 0.95rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: background 0.2s ease;
-    }
-
-    .todo-input button:hover {
-        background: #ffa96b;
-    }
-
-    ul {
-        list-style: none;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    li {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        padding: 10px 14px;
-        background: #1c2733;
-        border: 1px solid #31404f;
-        border-left: 3px solid #ff8a3d;
-        border-radius: 8px;
-        color: #dde4eb;
-        font-size: 0.95rem;
-    }
-
-    li button {
-        border: none;
-        background: #ff8a3d;
-        color: #1c2733;
-        width: 26px;
-        height: 26px;
-        border-radius: 50%;
-        font-weight: 700;
-        line-height: 1;
-        cursor: pointer;
-        flex-shrink: 0;
-        transition: background 0.2s ease;
-    }
-
-    li button:hover {
-        background: #ffa96b;
-    }
-
-    /* ---------- จอเล็ก ---------- */
-    @media (max-width: 620px) {
-        .card {
-            flex-direction: column;
-        }
-
-        .profile {
-            border-right: none;
-            border-bottom: 1px solid #31404f;
-            padding-right: 0;
-            padding-bottom: 24px;
-        }
-    }
-</style>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <!-- พื้นหลังตกแต่ง -->
+  <div class="bg" aria-hidden="true">
+    <span class="bg__blob bg__blob--1"></span>
+    <span class="bg__blob bg__blob--2"></span>
+    <span class="bg__blob bg__blob--3"></span>
+    <span class="bg__grid"></span>
+  </div>
 
-    <div class="card">
+  <!-- ===== Navbar ===== -->
+  <header class="navbar">
+    <div class="navbar__inner">
+      <a class="brand" href="#">
+        <span class="brand__mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="5" />
+            <circle cx="8.5" cy="8.5" r="1.3" fill="currentColor" stroke="none" />
+            <circle cx="15.5" cy="15.5" r="1.3" fill="currentColor" stroke="none" />
+            <circle cx="15.5" cy="8.5" r="1.3" fill="currentColor" stroke="none" />
+            <circle cx="8.5" cy="15.5" r="1.3" fill="currentColor" stroke="none" />
+          </svg>
+        </span>
+        <span class="brand__text">FOODPICKER <em>ITF</em></span>
+      </a>
 
-        <!-- ซ้าย: โปรไฟล์ -->
-        <div class="profile">
-            <img src="พรีม.png" alt="รูปโปรไฟล์">
-            <h1>Danulada Tawedetchnanan</h1>
-            <p class="info">Student ID: 69070059</p>
-            <p class="info">สาขา: IT KMITL</p>
-            <p>แนะนำตัว: eating cooking sleeping</p>
-            <div class="skills">
-                <p>skill: python</p>
-            </div>
-            <a href="https://github.com/69070059-p/pscp-69070059" target="_blank">github.com/69070059-p/pscp-69070059</a>
-        </div>
-
-        <!-- ขวา: Todo List -->
-        <div class="todo">
-            <h2>Todo List</h2>
-            <div class="todo-input">
-                <input type="text" id="todo-input" placeholder="กรอกงานที่ต้องทำ...">
-                <button id="add-btn" type="button">เพิ่ม</button>
-            </div>
-            <ul id="todoList">
-                <li><span>sleep</span><button type="button">X</button></li>
-                <li><span>eat</span><button type="button">X</button></li>
-                <li><span>talk</span><button type="button">X</button></li>
-            </ul>
-        </div>
-
+      <div class="owner">
+        <span class="owner__avatar" aria-hidden="true">ITF</span>
+        <span class="owner__detail">
+          <!-- แก้ไขชื่อและรหัสนักศึกษาได้ที่นี่ -->
+          <span class="owner__name">danulada taweedetchnanan</span>
+          <span class="owner__id">69070059</span>
+        </span>
+      </div>
     </div>
+  </header>
 
-    <!-- เชื่อมต่อไฟล์สคริปต์ JavaScript -->
-    <script src="script.js"></script>
+  <!-- ===== เนื้อหาหลัก ===== -->
+  <main class="page">
+    <section class="hero">
+      <p class="eyebrow">เมนูอาหารไทย · สุ่มได้ทุกวัน</p>
+      <h1 class="hero__title">วันนี้<span class="hero__title-accent">กินอะไรดี?</span></h1>
+      <p class="hero__sub">ไม่ต้องคิดนาน กดปุ่มเดียวแล้วให้ระบบเลือกเมนูเด็ดให้คุณ</p>
+    </section>
+
+    <!-- การ์ดแสดงข้อมูลอาหาร -->
+    <article class="card" id="foodCard" aria-live="polite">
+      <div class="card__media">
+        <img id="foodImage" class="card__img" src="" alt="" width="800" height="600" />
+        <span class="card__tag" id="foodTag">เมนูแนะนำ</span>
+        <span class="card__count" id="foodIndex">01 / 06</span>
+      </div>
+
+      <div class="card__body">
+        <h2 class="card__name" id="foodName">กำลังเลือกเมนู…</h2>
+        <p class="card__desc" id="foodDesc">กดปุ่มด้านล่างเพื่อสุ่มเมนูอาหาร</p>
+
+        <div class="card__meta">
+          <div class="price">
+            <span class="price__label">ราคา</span>
+            <span class="price__value">
+              <span id="foodPrice">–</span>
+              <span class="price__unit">บาท</span>
+            </span>
+          </div>
+
+          <div class="rating" id="foodRating" aria-label="คะแนนความนิยม">
+            <span class="rating__stars" aria-hidden="true">★★★★★</span>
+            <span class="rating__value" id="foodRatingValue">4.8</span>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- ปุ่มสุ่ม -->
+    <div class="actions">
+      <button class="shuffle" id="shuffleBtn" type="button">
+        <span class="shuffle__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="5" />
+            <circle cx="8.5" cy="8.5" r="1.2" fill="currentColor" stroke="none" />
+            <circle cx="15.5" cy="15.5" r="1.2" fill="currentColor" stroke="none" />
+            <circle cx="15.5" cy="8.5" r="1.2" fill="currentColor" stroke="none" />
+            <circle cx="8.5" cy="15.5" r="1.2" fill="currentColor" stroke="none" />
+          </svg>
+        </span>
+        <span class="shuffle__text">สุ่มเมนูอาหาร</span>
+        <span class="shuffle__glow" aria-hidden="true"></span>
+      </button>
+
+      <p class="hint">สุ่มแล้ว <strong id="spinCount">0</strong> ครั้ง · ทั้งหมด <strong id="menuCount">6</strong> เมนู</p>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>FOODPICKER ITF · โครงงานเว็บไซต์สุ่มเมนูอาหาร</p>
+    <p class="footer__muted">สร้างด้วย HTML · CSS · JavaScript</p>
+  </footer>
+
+  <script src="script.js"></script>
 </body>
 </html>

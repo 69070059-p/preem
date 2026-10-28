@@ -1,157 +1,174 @@
-// ============================================================
-//  To-do List  |  script.js
-//  รับคิดการ: เพิ่มข้อความ / ลบข้อความ / บันทึกลง Local Storage
-//  ไม่แก้ไข CSS หรือโครงสร้างของหน้าเว็บ
-// ============================================================
+/* =========================================================
+   FOODPICKER ITF — App logic
+   - ข้อมูลเมนูอาหาร (อย่างน้อย 5 รายการ)
+   - สุ่มเมนูแบบไม่ซ้ำทันที
+   - เปลี่ยนรูป / ชื่อ / คำอธิบาย / ราคา พร้อมแอนิเมชัน
+   ========================================================= */
 
-(function () {
-    "use strict";
+/* ---------- 1) ข้อมูลเมนูอาหาร ---------- */
+/* รูปภาพใช้ Wikimedia Commons (ฟรีไลเซนส์) หากต้องการเปลี่ยน
+   สามารถแก้ที่ image ได้เลย เช่น URL จาก Unsplash ก็ใช้ได้ */
+const commons = (file) =>
+  `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(file)}?width=1200`;
 
-    // ---- คีย์สำหรับเก็บข้อมูลใน Local Storage ----
-    const STORAGE_KEY = "todoTasks";
+const MENUS = [
+  {
+    name: "ข้าวมันไก่",
+    tag: "เมนูยอดนิยม",
+    description:
+      "ข้าวหุงน้ำมันมันไก่หอม ๆ เสิร์ฟคู่ไก่ต้มนุ่มฉ่ำ ราดน้ำจิ้มขิงสูตรเด็ด พร้อมน้ำซุปใสกลมกล่อม",
+    price: "50 – 60",
+    rating: 4.9,
+    image: commons("Hainanese chicken rice at Thai Ten.jpg"),
+  },
+  {
+    name: "ข้าวผัดกุ้ง",
+    tag: "จานเดียวอิ่ม",
+    description:
+      "ข้าวผัดร้อน ๆ จากกระทะไฟแรง ใส่กุ้งสดตัวโต ไข่ และต้นหอม กลิ่นหอมชวนหิวทุกคำ",
+    price: "55 – 65",
+    rating: 4.7,
+    image: commons("Shrimp Fried Rice (Taiwan).jpg"),
+  },
+  {
+    name: "ก๋วยเตี๋ยวเรือ",
+    tag: "รสจัดจ้าน",
+    description:
+      "เส้นเล็กนุ่มในน้ำซุปเข้มข้นเครื่องยาจีน กลิ่นหอมเฉพาะตัว เสิร์ฟพร้อมลูกชิ้นและใบกะเพรา",
+    price: "40 – 55",
+    rating: 4.8,
+    image: commons(
+      "Boat Noodles with sliced beef round steak, beef ball, braised shank and tendon.jpg"
+    ),
+  },
+  {
+    name: "ส้มตำไทย",
+    tag: "ยอดนิยมหน้าร้อน",
+    description:
+      "มะละกอกรอบคลุกน้ำปลา น้ำตาลปี๊บ และมะนาวสด รสเปรี้ยวหวานเค็มกลมกล่อม เผ็ดกำลังดี",
+    price: "45 – 60",
+    rating: 4.6,
+    image: commons("Somtam.jpg"),
+  },
+  {
+    name: "ผัดไทย",
+    tag: "เมนูคลาสสิก",
+    description:
+      "เส้นจันท์เหนียวนุ่มผัดซอสมะขามเข้มข้น ใส่กุ้งแห้ง ถั่วงอก และไข่ เสิร์ฟพร้อมมะนาวและถั่วลิสง",
+    price: "50 – 70",
+    rating: 4.8,
+    image: commons("Pad Thai Hor Kai.jpg"),
+  },
+  {
+    name: "ต้มยำกุ้ง",
+    tag: "ซุปไทยระดับโลก",
+    description:
+      "น้ำซุปเปรี้ยวเผ็ดหอมตะไคร้และใบมะกรูด ใส่กุ้งสดตัวโต มันกุ้งลอยหน้า อร่อยกลมกล่อม",
+    price: "60 – 80",
+    rating: 4.9,
+    image: commons("Tom yum goong at Thai Orchid Villa Kamppi.jpg"),
+  },
+];
 
-    // ---- ดึง Element จาก id ที่มีอยู่ใน index.html ----
-    const todoInput = document.getElementById("todo-input") || document.getElementById("todoInput");
-    const addBtn = document.getElementById("add-btn") || document.getElementById("addBtn");
-    const todoList = document.getElementById("todoList");
+/* ---------- 2) อ้างอิง element ---------- */
+const el = {
+  card: document.getElementById("foodCard"),
+  image: document.getElementById("foodImage"),
+  tag: document.getElementById("foodTag"),
+  index: document.getElementById("foodIndex"),
+  name: document.getElementById("foodName"),
+  desc: document.getElementById("foodDesc"),
+  price: document.getElementById("foodPrice"),
+  rating: document.getElementById("foodRatingValue"),
+  button: document.getElementById("shuffleBtn"),
+  counter: document.getElementById("spinCount"),
+  menuCount: document.getElementById("menuCount"),
+};
 
-    // ถ้าไม่พบ Element ที่จำเป็น ก็ไม่ต้องทำอะไรต่อ
-    if (!todoInput || !addBtn || !todoList) {
-        console.warn("To-do List: ไม่พบ Element ที่จำเป็น (todo-input, add-btn, todoList)");
-        return;
-    }
+let currentIndex = -1;
+let spins = 0;
+let isRolling = false;
 
-    // ---- ข้อมูลรายการทั้งหมด (เก็บ id แยกไว้ ลบได้ถูกต้นแม้ข้อความซ้ำ) ----
-    let tasks = [];
+/* ---------- 3) ผู้ช่วยเหลือ ---------- */
+const pad = (n) => String(n).padStart(2, "0");
 
-    // ---- สร้าง id สั้น ๆ สำหรับรายการ ----
-    let idCounter = 0;
-    function makeId() {
-        idCounter += 1;
-        return "task-" + Date.now() + "-" + idCounter;
-    }
+/** ภาพสำรองกรณีโหลดรูปจริงไม่สำเร็จ */
+function fallbackImage(food) {
+  const label = encodeURIComponent(food.name);
+  return `https://placehold.co/1200x900/FFE9DC/B43A0C?font=kanit&text=${label}`;
+}
 
-    // ---- บันทึกข้อมูลลง Local Storage ----
-    function saveTasks() {
-        try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
-        } catch (err) {
-            console.warn("To-do List: บันทึก Local Storage ไม่สำเร็จ", err);
-        }
-    }
+/** แสดงข้อมูลเมนูลงการ์ด */
+function render(food, index) {
+  el.name.textContent = food.name;
+  el.desc.textContent = food.description;
+  el.price.textContent = food.price;
+  el.rating.textContent = food.rating.toFixed(1);
+  el.tag.textContent = food.tag;
+  el.index.textContent = `${pad(index + 1)} / ${pad(MENUS.length)}`;
 
-    // ---- อ่านข้อมูลจาก Local Storage ----
-    function loadTasks() {
-        try {
-            const raw = localStorage.getItem(STORAGE_KEY);
-            if (!raw) return null;
-            const parsed = JSON.parse(raw);
-            if (!Array.isArray(parsed)) return null;
-            return parsed.map(function (item) {
-                // รองรับทั้งรูปแบบ ["งาน1"] และ [{id, text}]
-                if (typeof item === "string") {
-                    return { id: makeId(), text: item };
-                }
-                return { id: item.id || makeId(), text: String(item.text || "") };
-            });
-        } catch (err) {
-            console.warn("To-do List: อ่าน Local Storage ไม่สำเร็จ", err);
-            return null;
-        }
-    }
+  el.image.onerror = () => {
+    el.image.onerror = null;
+    el.image.src = fallbackImage(food);
+  };
+  el.image.alt = `รูปภาพ ${food.name}`;
+  el.image.src = food.image;
+}
 
-    // ---- สร้าง <li> พร้อมข้อความและปุ่มลบ (เหมือนรายการเดิมในหน้าเว็บ) ----
-    function createLiElement(task) {
-        const li = document.createElement("li");
+/** สุ่มหมายเลขเมนูใหม่ (ไม่ซ้ำกับเมนูปัจจุบันถ้ามีมากกว่า 1 เมนู) */
+function pickRandomIndex() {
+  if (MENUS.length <= 1) return 0;
 
-        const span = document.createElement("span");
-        span.textContent = task.text;
+  let next = Math.floor(Math.random() * MENUS.length);
+  while (next === currentIndex) {
+    next = Math.floor(Math.random() * MENUS.length);
+  }
+  return next;
+}
 
-        const deleteBtn = document.createElement("button");
-        deleteBtn.type = "button";
-        deleteBtn.textContent = "X";
-        deleteBtn.addEventListener("click", function () {
-            deleteTask(task.id);
-        });
+/** โหลดรูปเมนูล่วงหน้าแบบเว้นจังหวะ เพื่อให้การสุ่มลื่นไหล */
+function preloadImages() {
+  let i = 0;
+  const step = () => {
+    if (i >= MENUS.length) return;
+    const img = new Image();
+    img.src = MENUS[i].image;
+    i += 1;
+    window.setTimeout(step, 900);
+  };
+  window.setTimeout(step, 800);
+}
 
-        li.appendChild(span);
-        li.appendChild(deleteBtn);
-        return li;
-    }
+/* ---------- 4) การสุ่ม ---------- */
+function shuffleMenu() {
+  if (isRolling) return;
+  isRolling = true;
 
-    // ---- วาดรายการทั้งหมดลงใน <ul> ----
-    function renderTasks() {
-        todoList.innerHTML = "";
-        tasks.forEach(function (task) {
-            todoList.appendChild(createLiElement(task));
-        });
-    }
+  const nextIndex = pickRandomIndex();
+  const rollingTime = 520;
 
-    // ---- เพิ่มรายการใหม่ ----
-    function addTask() {
-        const text = todoInput.value.trim();
+  el.button.classList.add("is-rolling");
+  el.card.classList.add("is-rolling");
+  el.button.querySelector(".shuffle__text").textContent = "กำลังสุ่ม…";
 
-        // ถ้าพิมพ์เปล่า ไม่ต้องทำอะไร
-        if (text === "") {
-            todoInput.focus();
-            return;
-        }
+  window.setTimeout(() => {
+    currentIndex = nextIndex;
+    render(MENUS[currentIndex], currentIndex);
 
-        tasks.push({ id: makeId(), text: text });
-        saveTasks();
-        renderTasks();
+    spins += 1;
+    el.counter.textContent = spins;
 
-        // ล้างช่องพิมพ์ให้ว่าง
-        todoInput.value = "";
-        todoInput.focus();
-    }
+    el.card.classList.remove("is-rolling");
+    el.button.classList.remove("is-rolling");
+    el.button.querySelector(".shuffle__text").textContent = "สุ่มเมนูอาหาร";
+    isRolling = false;
+  }, rollingTime);
+}
 
-    // ---- ลบรายการออก ----
-    function deleteTask(id) {
-        tasks = tasks.filter(function (task) {
-            return task.id !== id;
-        });
-        saveTasks();
-        renderTasks();
-    }
+/* ---------- 5) เริ่มต้นการทำงาน ---------- */
+el.button.addEventListener("click", shuffleMenu);
 
-    // ---- ดักจับการกดปุ่ม "เพิ่ม" ----
-    addBtn.addEventListener("click", addTask);
-
-    // ---- กด Enter ในช่องพิมพ์เพื่อเพิ่มรายการ ----
-    todoInput.addEventListener("keydown", function (e) {
-        if (e.key === "Enter") {
-            e.preventDefault();
-            addTask();
-        }
-    });
-
-    // ---- เริ่มต้น: ดึงข้อมูลเดิมจาก Local Storage (ถ้ามี) มาแสดงผล ----
-    function init() {
-        const saved = loadTasks();
-
-        if (saved) {
-            // มีข้อมูลเคยบันทึกไว้ -> ใช้ข้อมูลนั้น
-            tasks = saved;
-        } else {
-            // ยังไม่เคยบันทึก -> เอารายการที่มีอยู่ในหน้าเว็บตอนแรกมาเป็นข้อมูลเริ่มต้น
-            const existingItems = todoList.querySelectorAll("li");
-            existingItems.forEach(function (li) {
-                const span = li.querySelector("span");
-                const text = span ? span.textContent.trim() : li.textContent.trim();
-                if (text !== "") {
-                    tasks.push({ id: makeId(), text: text });
-                }
-            });
-            saveTasks();
-        }
-
-        renderTasks();
-    }
-
-    if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", init);
-    } else {
-        init();
-    }
-})();
+el.menuCount.textContent = MENUS.length;
+currentIndex = 0;
+render(MENUS[0], 0);
+preloadImages();
